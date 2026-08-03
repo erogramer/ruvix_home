@@ -1132,8 +1132,6 @@ if ( ! function_exists('get_view_thumbnail')) {
 			return false;
 		}
 
-		$CI = & get_instance();
-
 		if (empty($thumb_width)) {
 			$thumb_width = 700;
 		}
@@ -1169,20 +1167,17 @@ if ( ! function_exists('get_view_thumbnail')) {
 			}
 
 			// 이미지 path 구함
+			// (호스트 문자열 비교 대신 경로(path)에서 uploads/editor/ 이후 부분만 추출합니다.
+			// 도메인/IP 등 접속 방식에 따라 저장된 절대경로의 호스트가 달라도 항상 동작합니다)
 			$p = parse_url($src);
-			if (isset($p['host']) && $p['host'] === $CI->input->server('HTTP_HOST')
-				&& strpos($p['path'], '/' . config_item('uploads_dir') . '/editor/') !== false) {
-				$thumb_tag = '<img src="' . thumb_url('editor', str_replace(site_url(config_item('uploads_dir') . '/editor') . '/', '', $src), $thumb_width) . '" ';
+			$editor_prefix = '/' . config_item('uploads_dir') . '/editor/';
+			$editor_prefix_pos = isset($p['path']) ? strpos($p['path'], $editor_prefix) : false;
+			if ($editor_prefix_pos !== false) {
+				$relative_filename = substr($p['path'], $editor_prefix_pos + strlen($editor_prefix));
+				$thumb_tag = '<img src="' . thumb_url('editor', $relative_filename, $thumb_width) . '" ';
 			} else {
 				$thumb_tag = '<img src="' . $src . '" ';
 			}
-			if ($width) {
-				$thumb_tag .= ' width="' . $width . '" ';
-			}
-			$thumb_tag .= 'alt="' . $alt . '" style="max-width:100%;"/>';
-
-			$img_tag = $matches[0][$i];
-			$contents = str_replace($img_tag, $thumb_tag, $contents);
 			if ($width) {
 				$thumb_tag .= ' width="' . $width . '" ';
 			}
@@ -1203,8 +1198,6 @@ if ( ! function_exists('get_view_thumbnail')) {
 if ( ! function_exists('get_post_image_url')) {
 	function get_post_image_url($contents = '', $thumb_width = '', $thumb_height = '')
 	{
-		$CI = & get_instance();
-
 		if (empty($contents)) {
 			return;
 		}
@@ -1222,15 +1215,14 @@ if ( ! function_exists('get_post_image_url')) {
 		preg_match("/src=[\'\"]?([^>\'\"]+[^>\'\"]+)/i", $img, $m);
 		$src = isset($m[1]) ? $m[1] : '';
 
+		// 호스트 문자열 비교 대신 경로(path)에서 uploads/editor/ 이후 부분만 추출합니다.
+		// 도메인/IP 등 접속 방식에 따라 저장된 절대경로의 호스트가 달라도 항상 동작합니다
 		$p = parse_url($src);
-		if (isset($p['host']) && $p['host'] === $CI->input->server('HTTP_HOST')
-			&& strpos($p['path'], '/' . config_item('uploads_dir') . '/editor/') !== false) {
-			$src = thumb_url(
-				'editor',
-				str_replace(site_url(config_item('uploads_dir') . '/editor') . '/', '', $src),
-				$thumb_width,
-				$thumb_height
-			);
+		$editor_prefix = '/' . config_item('uploads_dir') . '/editor/';
+		$editor_prefix_pos = isset($p['path']) ? strpos($p['path'], $editor_prefix) : false;
+		if ($editor_prefix_pos !== false) {
+			$relative_filename = substr($p['path'], $editor_prefix_pos + strlen($editor_prefix));
+			$src = thumb_url('editor', $relative_filename, $thumb_width, $thumb_height);
 		}
 		return $src;
 	}
