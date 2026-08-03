@@ -64,6 +64,7 @@ alert('<?php echo addslashes($pagemenu_js_alert_message); ?>');
 							$men_depth = (int) element('depth', $result);
 							$men_rowclass = $men_depth === 0 ? 'success' : 'warning';
 							$men_indent = $men_depth > 0 ? str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $men_depth) . str_repeat('<span class="fa fa-arrow-right"></span> ', $men_depth) : '';
+							$men_indent_spacing = $men_depth > 0 ? str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $men_depth) : '';
 							$men_id = element(element('primary_key', $view), $result);
 							$men_parent_id = (int) element('men_parent', $result);
 					?>
@@ -116,7 +117,7 @@ alert('<?php echo addslashes($pagemenu_js_alert_message); ?>');
 						</tr>
 						<tr class="pagemenu-link-row <?php echo $men_rowclass; ?>" data-men-id="<?php echo html_escape($men_id); ?>" data-men-parent="<?php echo html_escape($men_parent_id); ?>" data-men-depth="<?php echo $men_depth; ?>">
 							<th>
-								<?php echo $men_indent; ?>
+								<?php echo $men_indent_spacing; ?>
 								<button type="button" class="btn btn-outline btn-default btn-xs pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" data-men-label="<?php echo html_escape(element('men_name', $result)); ?>" style="display:none;"><?php echo html_escape(element('men_name', $result)); ?> 하위메뉴보기</button>
 								<div class="pull-right">링크주소</div>
 							</th>
