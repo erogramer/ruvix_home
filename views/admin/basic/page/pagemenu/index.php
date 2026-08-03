@@ -11,6 +11,12 @@
 		text-decoration: underline;
 	}
 </style>
+<?php $pagemenu_js_alert_message = $this->session->flashdata('js_alert_message'); ?>
+<?php if ($pagemenu_js_alert_message): ?>
+<script type="text/javascript">
+alert('<?php echo addslashes($pagemenu_js_alert_message); ?>');
+</script>
+<?php endif; ?>
 <div class="box">
 	<div class="box-table">
 		<?php

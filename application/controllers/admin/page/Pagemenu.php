@@ -215,12 +215,17 @@ class Pagemenu extends CB_Controller
 		Events::trigger('before', $eventname);
 
 		/**
-		 * 체크한 게시물의 업데이트를 실행합니다
+		 * 폼에 표시된 모든 메뉴 항목을 업데이트합니다.
+		 *
+		 * (기존에는 체크박스(chk[])가 체크된 항목만 업데이트했으나, 체크박스는 메뉴명 행에 있고
+		 * 링크주소 등은 아래 행에 있어 체크 여부와 무관하게 저장이 안 되는 것처럼 보이는 문제가 있었습니다.
+		 * men_name 배열에는 화면에 표시된 모든 메뉴 항목이 항상 포함되므로, 이를 기준으로 전체를
+		 * 업데이트합니다. 값이 바뀌지 않은 항목은 동일한 값으로 다시 저장될 뿐이라 안전합니다.)
 		 */
 		$updated_count = 0;
-		if ($this->input->post('chk') && is_array($this->input->post('chk'))) {
+		$men_name = $this->input->post('men_name');
+		if ($men_name && is_array($men_name)) {
 
-			$men_name = $this->input->post('men_name');
 			$men_target = $this->input->post('men_target');
 			$men_custom = $this->input->post('men_custom');
 			$men_order = $this->input->post('men_order');
@@ -228,13 +233,13 @@ class Pagemenu extends CB_Controller
 			$men_mobile = $this->input->post('men_mobile');
 			$men_link = $this->input->post('men_link');
 
-			foreach ($this->input->post('chk') as $val) {
+			foreach ($men_name as $val => $name) {
 				if ($val) {
 					$men_order_update = element($val, $men_order) ? element($val, $men_order) : 0;
 					$men_desktop_update = element($val, $men_desktop) ? element($val, $men_desktop) : 0;
 					$men_mobile_update = element($val, $men_mobile) ? element($val, $men_mobile) : 0;
 					$updatedata = array(
-						'men_name' => element($val, $men_name),
+						'men_name' => $name,
 						'men_target' => element($val, $men_target),
 						'men_custom' => element($val, $men_custom),
 						'men_order' => $men_order_update,
@@ -256,10 +261,11 @@ class Pagemenu extends CB_Controller
 		/**
 		 * 업데이트가 끝난 후 목록페이지로 이동합니다
 		 */
-		$this->session->set_flashdata(
-			'message',
-			$updated_count > 0 ? '정상적으로 수정되었습니다' : '선택된 항목이 없어 수정된 내용이 없습니다. 체크박스를 선택했는지 확인해주세요'
-		);
+		if ($updated_count > 0) {
+			$this->session->set_flashdata('message', '정상적으로 수정되었습니다');
+		} else {
+			$this->session->set_flashdata('js_alert_message', '수정할 메뉴가 없습니다');
+		}
 		$param =& $this->querystring;
 		$redirecturl = admin_url($this->pagedir . '?' . $param->output());
 
