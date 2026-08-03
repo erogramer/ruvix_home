@@ -1,14 +1,6 @@
 <style type="text/css">
-	.pagemenu-toggle-icon {
-		display: inline-block;
-		font-weight: bold;
-		font-size: 17px;
-		line-height: 1;
-		color: #ff5722;
-		transition: transform 0.15s ease-in-out;
-	}
-	.pagemenu-toggle-icon.pagemenu-toggle-icon-expanded {
-		transform: rotate(90deg);
+	.pagemenu-toggle {
+		margin-right: 8px;
 	}
 	.pagemenu-tooltip {
 		margin-bottom: 10px;
@@ -43,7 +35,7 @@
 			<div id="pagemenuTooltip" class="alert alert-info alert-dismissible pagemenu-tooltip" style="display:none;">
 				<button type="button" class="close" aria-label="닫기">&times;</button>
 				<span class="fa fa-info-circle"></span>
-				메뉴명 앞의 <span class="pagemenu-toggle-icon">&#10551;</span> 표시를 클릭하면 하위 메뉴를 펼치거나 접을 수 있습니다.
+				하위 메뉴가 있는 항목은 아래 <strong>링크주소</strong> 칸 왼쪽의 <strong>[하위메뉴 보기]</strong> 버튼을 클릭하면 펼치거나 접을 수 있습니다.
 				<a href="#" id="pagemenuTooltipHide" class="pagemenu-tooltip-hide">다시 보지 않기</a>
 			</div>
 			<div class="table-responsive">
@@ -73,7 +65,6 @@
 							<td>
 								<div class="form-group form-group-sm form-inline">
 									<?php echo $men_indent; ?>
-									<span class="pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" style="display:none; cursor:pointer; margin-right:4px;"><span class="pagemenu-toggle-icon">&#10551;</span></span>
 									<input type="text" name="men_name[<?php echo html_escape($men_id); ?>]" class="form-control input-sm pagemenu-men-name" value="<?php echo html_escape(element('men_name', $result)); ?>" />
 								</div>
 							</td>
@@ -118,7 +109,10 @@
 							</td>
 						</tr>
 						<tr class="pagemenu-link-row <?php echo $men_rowclass; ?>" data-men-id="<?php echo html_escape($men_id); ?>" data-men-parent="<?php echo html_escape($men_parent_id); ?>" data-men-depth="<?php echo $men_depth; ?>">
-							<th><div class="pull-right">링크주소</div></th>
+							<th>
+								<button type="button" class="btn btn-outline btn-default btn-xs pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" style="display:none;">하위메뉴 보기</button>
+								<div class="pull-right">링크주소</div>
+							</th>
 							<td colspan="6">
 								<div class="form-group form-group-sm">
 									<input type="text" name="men_link[<?php echo html_escape($men_id); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_link', $result)); ?>" />
@@ -252,7 +246,7 @@ $(function() {
 		}
 	});
 
-	// 메뉴 목록 아코디언 : 하위 메뉴가 있는 행에만 토글 아이콘을 표시하고,
+	// 메뉴 목록 아코디언 : 하위 메뉴가 있는 항목에만 토글 버튼을 표시하고,
 	// 클릭 시 직계 하위 메뉴(및 그 이하)를 접었다 펼쳤다 합니다.
 	var $rows = $('#flist tr.pagemenu-item-row, #flist tr.pagemenu-link-row');
 	var hasChildren = {};
@@ -269,20 +263,29 @@ $(function() {
 		});
 	}
 
+	function resetToggleButton(menId) {
+		$('.pagemenu-toggle[data-toggle-id="' + menId + '"]')
+			.text('하위메뉴 보기')
+			.removeClass('btn-info')
+			.addClass('btn-default');
+	}
+
 	function collapse(menId) {
 		var $children = childRows(menId);
 		$children.each(function() {
 			var $child = $(this);
 			if ($child.hasClass('pagemenu-item-row')) {
-				collapse($child.data('men-id'));
+				var childId = $child.data('men-id');
+				collapse(childId);
+				resetToggleButton(childId);
 			}
 		});
 		$children.hide();
 	}
 
-	// 하위 메뉴가 있는 항목에는 토글 아이콘을 표시합니다. 초기 상태는 '접힘'입니다.
+	// 하위 메뉴가 있는 항목에는 토글 버튼을 표시합니다. 초기 상태는 '접힘'입니다.
 	var hasAnyChildren = false;
-	$rows.filter('.pagemenu-item-row').each(function() {
+	$rows.filter('.pagemenu-link-row').each(function() {
 		var menId = $(this).data('men-id');
 		if (hasChildren[menId]) {
 			hasAnyChildren = true;
@@ -294,17 +297,17 @@ $(function() {
 	$rows.filter('[data-men-depth!="0"]').hide();
 
 	$('#flist').on('click', '.pagemenu-toggle', function() {
-		var menId = $(this).data('toggle-id');
-		var $icon = $(this).find('.pagemenu-toggle-icon');
+		var $btn = $(this);
+		var menId = $btn.data('toggle-id');
 		var $children = childRows(menId);
 		var expanding = $children.first().is(':hidden');
 
 		if (expanding) {
 			$children.show();
-			$icon.addClass('pagemenu-toggle-icon-expanded');
+			$btn.text('접기').removeClass('btn-default').addClass('btn-info');
 		} else {
 			collapse(menId);
-			$icon.removeClass('pagemenu-toggle-icon-expanded');
+			$btn.text('하위메뉴 보기').removeClass('btn-info').addClass('btn-default');
 		}
 	});
 
