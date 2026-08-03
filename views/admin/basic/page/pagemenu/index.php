@@ -311,6 +311,19 @@ $(function() {
 		}
 	});
 
+	// 체크박스(선택수정 대상)는 메뉴명 행에 있지만 링크주소 등은 아래 행에 있어,
+	// 값만 수정하고 체크박스 체크를 깜빡하면 '선택수정'을 눌러도 저장되지 않는 문제가 있었습니다.
+	// 값을 수정하면 해당 행의 체크박스를 자동으로 체크해 이 문제를 방지합니다.
+	$('#flist').on('input change', '.pagemenu-item-row input:not(.list-chkbox), .pagemenu-item-row select, .pagemenu-link-row input', function() {
+		var $row = $(this).closest('tr');
+		var menId = $row.data('men-id');
+		var $checkbox = $('#flist input.list-chkbox[value="' + menId + '"]');
+		if ($checkbox.length && ! $checkbox.prop('checked')) {
+			$checkbox.prop('checked', true);
+			$('.btn-list-update, .btn-list-selected').removeClass('disabled');
+		}
+	});
+
 	// 아코디언 사용법 툴팁 : '다시 보지 않기'를 선택하면 쿠키에 저장하여 이후에는 표시하지 않습니다.
 	function getCookie(name) {
 		var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));

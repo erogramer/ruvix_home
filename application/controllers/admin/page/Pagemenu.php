@@ -217,6 +217,7 @@ class Pagemenu extends CB_Controller
 		/**
 		 * 체크한 게시물의 업데이트를 실행합니다
 		 */
+		$updated_count = 0;
 		if ($this->input->post('chk') && is_array($this->input->post('chk'))) {
 
 			$men_name = $this->input->post('men_name');
@@ -242,6 +243,7 @@ class Pagemenu extends CB_Controller
 						'men_link' => element($val, $men_link),
 					);
 					$this->{$this->modelname}->update($val, $updatedata);
+					$updated_count++;
 				}
 			}
 		}
@@ -256,7 +258,7 @@ class Pagemenu extends CB_Controller
 		 */
 		$this->session->set_flashdata(
 			'message',
-			'정상적으로 수정되었습니다'
+			$updated_count > 0 ? '정상적으로 수정되었습니다' : '선택된 항목이 없어 수정된 내용이 없습니다. 체크박스를 선택했는지 확인해주세요'
 		);
 		$param =& $this->querystring;
 		$redirecturl = admin_url($this->pagedir . '?' . $param->output());
