@@ -120,22 +120,26 @@ opacity: 1; }
 
 /* ===============================================================
    메뉴 아코디언 UI (1depth 는 항상 노출, 하위 depth 는 클릭으로 열고 닫기)
-   - PC 상단메뉴(.site-navigation)에서는 클릭시 나타나는 드롭다운 패널로,
-   - 모바일 오프캔버스/사이드메뉴(.site-mobile-menu, #side_menu)에서는 제자리에서
-     펼쳐지는 세로형 아코디언으로 동작하도록 위치(position)만 컨텍스트별로 다르게 처리합니다.
+   - PC 상단메뉴(.site-navigation)는 원래 방식대로 마우스 호버로 드롭다운이 열립니다
+     (화살표 토글 버튼은 PC 헤더에서는 숨기고, 기존 :before 화살표 아이콘을 그대로 사용합니다)
+   - 모바일 오프캔버스/사이드메뉴(.site-mobile-menu, #side_menu)는 호버가 되지 않으므로
+     화살표 토글 버튼을 클릭해서 제자리에서 펼쳐지는 세로형 아코디언으로 동작합니다.
 ================================================================ */
 
-/* 화살표 토글 버튼을 별도로 그려주므로 기존 has-children 의 화살표 아이콘(:before)은 숨깁니다 */
-.site-navbar .site-navigation .site-menu .has-children > a:before,
-.site-navbar .site-navigation .site-menu .has-children .dropdown > li.has-children > a:before {
-	content: none;
-}
-.site-navbar .site-navigation .site-menu .has-children > a {
-	padding-right: 44px;
+/* PC 헤더에서는 호버로 드롭다운을 엽니다 (버튼 클릭 없이) */
+.site-navbar .site-navigation .site-menu .has-children:hover > .dropdown {
+	transition-delay: 0s;
+	margin-top: 0px;
+	visibility: visible;
+	opacity: 1;
 }
 
-/* 하위메뉴 열기/닫기 토글 버튼 */
-.site-menu .menu-toggle,
+/* PC 헤더에서는 화살표 토글 버튼을 숨기고, 기존 :before 화살표를 위한 여백만 유지합니다 */
+.site-navbar .site-navigation .site-menu .menu-toggle {
+	display: none;
+}
+
+/* 하위메뉴 열기/닫기 토글 버튼 (모바일 오프캔버스 / 사이드메뉴 전용) */
 .site-nav-wrap .menu-toggle,
 .dropdown-custom-menu .menu-toggle,
 .dropdown-menu .menu-toggle {
@@ -152,7 +156,6 @@ opacity: 1; }
 	cursor: pointer;
 	color: inherit;
 }
-.site-menu .menu-toggle i,
 .site-nav-wrap .menu-toggle i,
 .dropdown-custom-menu .menu-toggle i,
 .dropdown-menu .menu-toggle i {
