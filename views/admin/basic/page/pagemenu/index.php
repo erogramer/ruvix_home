@@ -39,12 +39,15 @@
 							$men_depth = (int) element('depth', $result);
 							$men_rowclass = $men_depth === 0 ? 'success' : 'warning';
 							$men_indent = $men_depth > 0 ? str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $men_depth) . str_repeat('<span class="fa fa-arrow-right"></span> ', $men_depth) : '';
+							$men_id = element(element('primary_key', $view), $result);
+							$men_parent_id = (int) element('men_parent', $result);
 					?>
-						<tr class="<?php echo $men_rowclass; ?>">
+						<tr class="pagemenu-item-row <?php echo $men_rowclass; ?>" data-men-id="<?php echo html_escape($men_id); ?>" data-men-parent="<?php echo html_escape($men_parent_id); ?>" data-men-depth="<?php echo $men_depth; ?>">
 							<td>
 								<div class="form-group form-group-sm form-inline">
 									<?php echo $men_indent; ?>
-									<input type="text" name="men_name[<?php echo element(element('primary_key', $view), $result); ?>]" class="form-control input-sm pagemenu-men-name" value="<?php echo html_escape(element('men_name', $result)); ?>" />
+									<span class="pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" style="display:none; cursor:pointer; margin-right:4px;"><span class="fa fa-caret-down"></span></span>
+									<input type="text" name="men_name[<?php echo html_escape($men_id); ?>]" class="form-control input-sm pagemenu-men-name" value="<?php echo html_escape(element('men_name', $result)); ?>" />
 								</div>
 							</td>
 							<td>
@@ -87,11 +90,11 @@
 								</div>
 							</td>
 						</tr>
-						<tr class="<?php echo $men_rowclass; ?>">
+						<tr class="pagemenu-link-row <?php echo $men_rowclass; ?>" data-men-id="<?php echo html_escape($men_id); ?>" data-men-parent="<?php echo html_escape($men_parent_id); ?>" data-men-depth="<?php echo $men_depth; ?>">
 							<th><div class="pull-right">링크주소</div></th>
 							<td colspan="6">
 								<div class="form-group form-group-sm">
-									<input type="text" name="men_link[<?php echo element(element('primary_key', $view), $result); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_link', $result)); ?>" />
+									<input type="text" name="men_link[<?php echo html_escape($men_id); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_link', $result)); ?>" />
 								</div>
 							</td>
 						</tr>
@@ -219,6 +222,62 @@ $(function() {
 		rules: {
 			men_nemu: { required:true},
 			men_link: { required:true}
+		}
+	});
+
+	// 메뉴 목록 아코디언 : 하위 메뉴가 있는 행에만 토글 아이콘을 표시하고,
+	// 클릭 시 직계 하위 메뉴(및 그 이하)를 접었다 펼쳤다 합니다.
+	var $rows = $('#flist tr.pagemenu-item-row, #flist tr.pagemenu-link-row');
+	var hasChildren = {};
+	$rows.filter('.pagemenu-item-row').each(function() {
+		var parentId = $(this).data('men-parent');
+		if (parentId) {
+			hasChildren[parentId] = true;
+		}
+	});
+
+	function childRows(menId) {
+		return $rows.filter(function() {
+			return $(this).data('men-parent') == menId;
+		});
+	}
+
+	function collapse(menId) {
+		var $children = childRows(menId);
+		$children.each(function() {
+			var $child = $(this);
+			if ($child.hasClass('pagemenu-item-row')) {
+				collapse($child.data('men-id'));
+			}
+		});
+		$children.hide();
+	}
+
+	// 하위 메뉴가 있는 항목에는 토글 아이콘을 표시하고, 초기 상태는 '접힘'으로 둡니다.
+	$rows.filter('.pagemenu-item-row').each(function() {
+		var menId = $(this).data('men-id');
+		if (hasChildren[menId]) {
+			$(this).find('.pagemenu-toggle')
+				.show()
+				.find('.fa').removeClass('fa-caret-down').addClass('fa-caret-right');
+		}
+	});
+
+	// 최상위(depth 0)를 제외한 모든 하위 메뉴는 기본적으로 접어둡니다.
+	$rows.filter('[data-men-depth!="0"]').hide();
+
+	$('#flist').on('click', '.pagemenu-toggle', function() {
+		var menId = $(this).data('toggle-id');
+		var $icon = $(this).find('.fa');
+		var $children = childRows(menId);
+		var expanding = $children.first().is(':hidden');
+
+		if (expanding) {
+			$children.show();
+			$icon.removeClass('fa-caret-right').addClass('fa-caret-down');
+		} else {
+			collapse(menId);
+			$icon.removeClass('fa-caret-down').addClass('fa-caret-right');
 		}
 	});
 });
