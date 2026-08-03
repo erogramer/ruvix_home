@@ -41,7 +41,7 @@ alert('<?php echo addslashes($pagemenu_js_alert_message); ?>');
 			<div id="pagemenuTooltip" class="alert alert-info alert-dismissible pagemenu-tooltip" style="display:none;">
 				<button type="button" class="close" aria-label="닫기">&times;</button>
 				<span class="fa fa-info-circle"></span>
-				하위 메뉴가 있는 항목은 아래 <strong>링크주소</strong> 칸 왼쪽의 <strong>[하위메뉴 보기]</strong> 버튼을 클릭하면 펼치거나 접을 수 있습니다.
+				하위 메뉴가 있는 항목은 아래 <strong>링크주소</strong> 칸 왼쪽의 <strong>[메뉴명 하위메뉴보기]</strong> 버튼을 클릭하면 펼치거나 접을 수 있습니다.
 				<a href="#" id="pagemenuTooltipHide" class="pagemenu-tooltip-hide">다시 보지 않기</a>
 			</div>
 			<div class="table-responsive">
@@ -116,7 +116,8 @@ alert('<?php echo addslashes($pagemenu_js_alert_message); ?>');
 						</tr>
 						<tr class="pagemenu-link-row <?php echo $men_rowclass; ?>" data-men-id="<?php echo html_escape($men_id); ?>" data-men-parent="<?php echo html_escape($men_parent_id); ?>" data-men-depth="<?php echo $men_depth; ?>">
 							<th>
-								<button type="button" class="btn btn-outline btn-default btn-xs pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" style="display:none;">하위메뉴 보기</button>
+								<?php echo $men_indent; ?>
+								<button type="button" class="btn btn-outline btn-default btn-xs pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" data-men-label="<?php echo html_escape(element('men_name', $result)); ?>" style="display:none;"><?php echo html_escape(element('men_name', $result)); ?> 하위메뉴보기</button>
 								<div class="pull-right">링크주소</div>
 							</th>
 							<td colspan="6">
@@ -270,8 +271,8 @@ $(function() {
 	}
 
 	function resetToggleButton(menId) {
-		$('.pagemenu-toggle[data-toggle-id="' + menId + '"]')
-			.text('하위메뉴 보기')
+		var $btn = $('.pagemenu-toggle[data-toggle-id="' + menId + '"]');
+		$btn.text($btn.data('men-label') + ' 하위메뉴보기')
 			.removeClass('btn-info')
 			.addClass('btn-default');
 	}
@@ -305,15 +306,16 @@ $(function() {
 	$('#flist').on('click', '.pagemenu-toggle', function() {
 		var $btn = $(this);
 		var menId = $btn.data('toggle-id');
+		var menLabel = $btn.data('men-label');
 		var $children = childRows(menId);
 		var expanding = $children.first().is(':hidden');
 
 		if (expanding) {
 			$children.show();
-			$btn.text('접기').removeClass('btn-default').addClass('btn-info');
+			$btn.text(menLabel + ' 하위메뉴접기').removeClass('btn-default').addClass('btn-info');
 		} else {
 			collapse(menId);
-			$btn.text('하위메뉴 보기').removeClass('btn-info').addClass('btn-default');
+			$btn.text(menLabel + ' 하위메뉴보기').removeClass('btn-info').addClass('btn-default');
 		}
 	});
 
