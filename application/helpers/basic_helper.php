@@ -1172,9 +1172,16 @@ if ( ! function_exists('get_view_thumbnail')) {
 			$p = parse_url($src);
 			$editor_prefix = '/' . config_item('uploads_dir') . '/editor/';
 			$editor_prefix_pos = isset($p['path']) ? strpos($p['path'], $editor_prefix) : false;
+			$thumb_src = '';
 			if ($editor_prefix_pos !== false) {
 				$relative_filename = substr($p['path'], $editor_prefix_pos + strlen($editor_prefix));
-				$thumb_tag = '<img src="' . thumb_url('editor', $relative_filename, $thumb_width) . '" ';
+				$thumb_src = thumb_url('editor', $relative_filename, $thumb_width);
+			}
+			// 원본 파일을 서버에서 찾지 못하면 thumb_url() 이 사이트 루트 주소만 반환하므로,
+			// 그런 경우에는 깨진 이미지 대신 원본 $src 를 그대로 사용합니다
+			$thumb_path = $thumb_src ? parse_url($thumb_src, PHP_URL_PATH) : '';
+			if ($thumb_src && $thumb_path && $thumb_path !== '/') {
+				$thumb_tag = '<img src="' . $thumb_src . '" ';
 			} else {
 				$thumb_tag = '<img src="' . $src . '" ';
 			}
@@ -1220,9 +1227,16 @@ if ( ! function_exists('get_post_image_url')) {
 		$p = parse_url($src);
 		$editor_prefix = '/' . config_item('uploads_dir') . '/editor/';
 		$editor_prefix_pos = isset($p['path']) ? strpos($p['path'], $editor_prefix) : false;
+		$thumb_src = '';
 		if ($editor_prefix_pos !== false) {
 			$relative_filename = substr($p['path'], $editor_prefix_pos + strlen($editor_prefix));
-			$src = thumb_url('editor', $relative_filename, $thumb_width, $thumb_height);
+			$thumb_src = thumb_url('editor', $relative_filename, $thumb_width, $thumb_height);
+		}
+		// 원본 파일을 서버에서 찾지 못하면 thumb_url() 이 사이트 루트 주소만 반환하므로,
+		// 그런 경우에는 깨진 이미지 대신 원본 $src 를 그대로 사용합니다
+		$thumb_path = $thumb_src ? parse_url($thumb_src, PHP_URL_PATH) : '';
+		if ($thumb_src && $thumb_path && $thumb_path !== '/') {
+			$src = $thumb_src;
 		}
 		return $src;
 	}
