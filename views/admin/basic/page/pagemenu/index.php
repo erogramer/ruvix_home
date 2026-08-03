@@ -1,3 +1,24 @@
+<style type="text/css">
+	.pagemenu-toggle-icon {
+		display: inline-block;
+		font-weight: bold;
+		font-size: 17px;
+		line-height: 1;
+		color: #ff5722;
+		transition: transform 0.15s ease-in-out;
+	}
+	.pagemenu-toggle-icon.pagemenu-toggle-icon-expanded {
+		transform: rotate(90deg);
+	}
+	.pagemenu-tooltip {
+		margin-bottom: 10px;
+	}
+	.pagemenu-tooltip-hide {
+		margin-left: 12px;
+		font-weight: bold;
+		text-decoration: underline;
+	}
+</style>
 <div class="box">
 	<div class="box-table">
 		<?php
@@ -18,6 +39,12 @@
 				ob_end_flush();
 				?>
 				<div class="row">전체 : <?php echo element('total_rows', element('data', $view), 0); ?>건</div>
+			</div>
+			<div id="pagemenuTooltip" class="alert alert-info alert-dismissible pagemenu-tooltip" style="display:none;">
+				<button type="button" class="close" aria-label="닫기">&times;</button>
+				<span class="fa fa-info-circle"></span>
+				메뉴명 앞의 <span class="pagemenu-toggle-icon">&#10551;</span> 표시를 클릭하면 하위 메뉴를 펼치거나 접을 수 있습니다.
+				<a href="#" id="pagemenuTooltipHide" class="pagemenu-tooltip-hide">다시 보지 않기</a>
 			</div>
 			<div class="table-responsive">
 				<table class="table table-hover table-striped">
@@ -46,7 +73,7 @@
 							<td>
 								<div class="form-group form-group-sm form-inline">
 									<?php echo $men_indent; ?>
-									<span class="pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" style="display:none; cursor:pointer; margin-right:4px;"><span class="fa fa-caret-down"></span></span>
+									<span class="pagemenu-toggle" data-toggle-id="<?php echo html_escape($men_id); ?>" style="display:none; cursor:pointer; margin-right:4px;"><span class="pagemenu-toggle-icon">&#10551;</span></span>
 									<input type="text" name="men_name[<?php echo html_escape($men_id); ?>]" class="form-control input-sm pagemenu-men-name" value="<?php echo html_escape(element('men_name', $result)); ?>" />
 								</div>
 							</td>
@@ -253,13 +280,13 @@ $(function() {
 		$children.hide();
 	}
 
-	// 하위 메뉴가 있는 항목에는 토글 아이콘을 표시하고, 초기 상태는 '접힘'으로 둡니다.
+	// 하위 메뉴가 있는 항목에는 토글 아이콘을 표시합니다. 초기 상태는 '접힘'입니다.
+	var hasAnyChildren = false;
 	$rows.filter('.pagemenu-item-row').each(function() {
 		var menId = $(this).data('men-id');
 		if (hasChildren[menId]) {
-			$(this).find('.pagemenu-toggle')
-				.show()
-				.find('.fa').removeClass('fa-caret-down').addClass('fa-caret-right');
+			hasAnyChildren = true;
+			$(this).find('.pagemenu-toggle').show();
 		}
 	});
 
@@ -268,17 +295,41 @@ $(function() {
 
 	$('#flist').on('click', '.pagemenu-toggle', function() {
 		var menId = $(this).data('toggle-id');
-		var $icon = $(this).find('.fa');
+		var $icon = $(this).find('.pagemenu-toggle-icon');
 		var $children = childRows(menId);
 		var expanding = $children.first().is(':hidden');
 
 		if (expanding) {
 			$children.show();
-			$icon.removeClass('fa-caret-right').addClass('fa-caret-down');
+			$icon.addClass('pagemenu-toggle-icon-expanded');
 		} else {
 			collapse(menId);
-			$icon.removeClass('fa-caret-down').addClass('fa-caret-right');
+			$icon.removeClass('pagemenu-toggle-icon-expanded');
 		}
+	});
+
+	// 아코디언 사용법 툴팁 : '다시 보지 않기'를 선택하면 쿠키에 저장하여 이후에는 표시하지 않습니다.
+	function getCookie(name) {
+		var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+		return match ? decodeURIComponent(match[1]) : null;
+	}
+	function setCookie(name, value, days) {
+		var date = new Date();
+		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/';
+	}
+
+	var TOOLTIP_COOKIE_NAME = 'pagemenu_accordion_tooltip_hide';
+	if (hasAnyChildren && ! getCookie(TOOLTIP_COOKIE_NAME)) {
+		$('#pagemenuTooltip').show();
+	}
+	$('#pagemenuTooltip').on('click', '.close', function() {
+		$('#pagemenuTooltip').hide();
+	});
+	$('#pagemenuTooltipHide').on('click', function(e) {
+		e.preventDefault();
+		setCookie(TOOLTIP_COOKIE_NAME, '1', 365);
+		$('#pagemenuTooltip').hide();
 	});
 });
 //]]>
