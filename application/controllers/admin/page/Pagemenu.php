@@ -163,17 +163,18 @@ class Pagemenu extends CB_Controller
 		 * 게시판 목록에 필요한 정보를 가져옵니다.
 		 */
 		$this->{$this->modelname}->allow_order_field = array('men_order'); // 정렬이 가능한 필드
-		$where = array('men_parent' => 0);
 		$result = $this->{$this->modelname}
-			->get_admin_list($per_page = 1000, '', $where, '', $findex = 'men_order', $forder = 'ASC', '', '');
+			->get_admin_list($per_page = 1000, '', '', '', $findex = 'men_order', $forder = 'ASC', '', '');
+
+		$bymen_parent = array();
 		if (element('list', $result)) {
-			foreach (element('list', $result) as $key => $val) {
-				$subwhere = array('men_parent' => element('men_id', $val));
-				$subresult = $this->{$this->modelname}
-					->get_admin_list($per_page = 1000, '', $subwhere, '', $findex = 'men_order', $forder = 'ASC', '', '');
-				$result['list'][$key]['subresult'] = $subresult;
+			foreach (element('list', $result) as $val) {
+				$bymen_parent[element('men_parent', $val)][] = $val;
 			}
 		}
+
+		// men_parent 를 기준으로 재귀적으로 펼친 목록입니다. (무한 depth, depth 키 포함)
+		$result['list'] = $this->_flatten_menu_tree($bymen_parent);
 
 		$view['view']['data'] = $result;
 
@@ -312,5 +313,28 @@ class Pagemenu extends CB_Controller
 	{
 		$this->cache->delete('pagemenu-mobile');
 		$this->cache->delete('pagemenu-desktop');
+	}
+
+	/**
+	 * men_parent 기준으로 묶인 메뉴 배열($bymen_parent[men_parent][] = row)을
+	 * 부모 -> 자식 순서로 재귀적으로 펼치면서 각 항목에 depth 를 추가합니다 (무한 depth 지원)
+	 */
+	protected function _flatten_menu_tree($bymen_parent, $parent_id = 0, $depth = 0)
+	{
+		$result = array();
+		if (empty($bymen_parent[$parent_id])) {
+			return $result;
+		}
+
+		foreach ($bymen_parent[$parent_id] as $val) {
+			$val['depth'] = $depth;
+			$result[] = $val;
+			$result = array_merge(
+				$result,
+				$this->_flatten_menu_tree($bymen_parent, element('men_id', $val), $depth + 1)
+			);
+		}
+
+		return $result;
 	}
 }

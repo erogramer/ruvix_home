@@ -36,11 +36,15 @@
 					<?php
 					if (element('list', element('data', $view))) {
 						foreach (element('list', element('data', $view)) as $result) {
+							$men_depth = (int) element('depth', $result);
+							$men_rowclass = $men_depth === 0 ? 'success' : 'warning';
+							$men_indent = $men_depth > 0 ? str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $men_depth) . str_repeat('<span class="fa fa-arrow-right"></span> ', $men_depth) : '';
 					?>
-						<tr class="success">
+						<tr class="<?php echo $men_rowclass; ?>">
 							<td>
-								<div class="form-group form-group-sm">
-									<input type="text" name="men_name[<?php echo element(element('primary_key', $view), $result); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_name', $result)); ?>" />
+								<div class="form-group form-group-sm form-inline">
+									<?php echo $men_indent; ?>
+									<input type="text" name="men_name[<?php echo element(element('primary_key', $view), $result); ?>]" class="form-control input-sm pagemenu-men-name" value="<?php echo html_escape(element('men_name', $result)); ?>" />
 								</div>
 							</td>
 							<td>
@@ -83,7 +87,7 @@
 								</div>
 							</td>
 						</tr>
-						<tr class="success">
+						<tr class="<?php echo $men_rowclass; ?>">
 							<th><div class="pull-right">링크주소</div></th>
 							<td colspan="6">
 								<div class="form-group form-group-sm">
@@ -91,78 +95,17 @@
 								</div>
 							</td>
 						</tr>
-						<?php
-						if (element('list', element('subresult', $result))) {
-							foreach (element('list', element('subresult', $result)) as $subresult) {
-						?>
-						<tr class="warning">
-							<td>
-								<div class="form-group form-group-sm form-inline pull-right">
-									<span class="fa fa-arrow-right"></span>
-									<input type="text" name="men_name[<?php echo element(element('primary_key', $view), $subresult); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_name', $subresult)); ?>" />
-								</div>
-							</td>
-							<td>
-								<div class="form-group form-group-sm">
-									<select name="men_target[<?php echo element(element('primary_key', $view), $subresult); ?>]" class="form-control input-sm">
-										<option value="" <?php echo ( ! element('men_target', $subresult)) ? 'selected="selected"' : ''; ?>>현재창</option>
-										<option value="_blank" <?php echo (element('men_target', $subresult) === '_blank') ? 'selected="selected"' : ''; ?>>새창</option>
-									</select>
-								</div>
-							</td>
-							<td>
-								<div class="form-group form-group-sm">
-									<input type="text" name="men_custom[<?php echo element(element('primary_key', $view), $subresult); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_custom', $subresult)); ?>" />
-								</div>
-							</td>
-							<td>
-								<div class="form-group form-group-sm">
-									<input type="number" name="men_order[<?php echo element(element('primary_key', $view), $subresult); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_order', $subresult)); ?>" />
-								</div>
-							</td>
-							<td>
-								<div class="form-group form-group-sm">
-									<select name="men_desktop[<?php echo element(element('primary_key', $view), $subresult); ?>]" class="form-control input-sm">
-										<option value="1" <?php echo (element('men_desktop', $subresult) === '1') ? 'selected="selected"' : ''; ?>>사용함</option>
-										<option value="0" <?php echo (element('men_desktop', $subresult) !== '1') ? 'selected="selected"' : ''; ?>>사용안함</option>
-									</select>
-								</div>
-							</td>
-							<td>
-								<div class="form-group form-group-sm">
-									<select name="men_mobile[<?php echo element(element('primary_key', $view), $subresult); ?>]" class="form-control input-sm">
-										<option value="1" <?php echo (element('men_mobile', $subresult) === '1') ? 'selected="selected"' : ''; ?>>사용함</option>
-										<option value="0" <?php echo (element('men_mobile', $subresult) !== '1') ? 'selected="selected"' : ''; ?>>사용안함</option>
-									</select>
-								</div>
-							</td>
-							<td>
-								<div class="form-group form-group-sm">
-								<input type="checkbox" name="chk[]" class="list-chkbox" value="<?php echo element(element('primary_key', $view), $subresult); ?>" />
-								</div>
-							</td>
-						</tr>
-						<tr class="warning">
-							<th><div class="pull-right">링크주소</div></th>
-							<td colspan="6">
-								<div class="form-group form-group-sm">
-									<input type="text" name="men_link[<?php echo element(element('primary_key', $view), $subresult); ?>]" class="form-control input-sm" value="<?php echo html_escape(element('men_link', $subresult)); ?>" />
-								</div>
-							</td>
-						</tr>
-						<?php
-											}
-									}
-							}
+					<?php
 						}
-						if ( ! element('list', element('data', $view))) {
-						?>
-							<tr>
-								<td colspan="7" class="nopost">자료가 없습니다</td>
-							</tr>
-						<?php
-						}
-						?>
+					}
+					if ( ! element('list', element('data', $view))) {
+					?>
+						<tr>
+							<td colspan="7" class="nopost">자료가 없습니다</td>
+						</tr>
+					<?php
+					}
+					?>
 					</tbody>
 				</table>
 			</div>
@@ -205,8 +148,10 @@
 										<?php
 										if (element('list', element('data', $view))) {
 											foreach (element('list', element('data', $view)) as $result) {
+												$men_depth = (int) element('depth', $result);
+												$men_indent = str_repeat('　', $men_depth);
 										?>
-											<option value="<?php echo html_escape(element('men_id', $result)); ?>"><?php echo html_escape(element('men_name', $result)); ?>의 하위메뉴</option>
+											<option value="<?php echo html_escape(element('men_id', $result)); ?>"><?php echo $men_indent; ?><?php echo html_escape(element('men_name', $result)); ?>의 하위메뉴</option>
 										<?php
 											}
 										}

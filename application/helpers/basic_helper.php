@@ -152,6 +152,160 @@ if ( ! function_exists('array_to_keys')) {
 
 
 /**
+ * 무한 depth 메뉴를 site-menu/has-children/dropdown 구조의 HTML 로 재귀 출력합니다
+ * $menu 는 Menu_model::get_all_menu() 가 반환하는 $menu[men_parent][men_id] = row 형태입니다
+ * 클릭으로 여닫는 아코디언 UI(assets/css/menu.css, assets/js/menu.js)를 위해
+ * 각 depth 마다 'depth-N' 클래스와 하위메뉴 토글 버튼을 함께 출력합니다
+ */
+if ( ! function_exists('render_menu_dropdown')) {
+	function render_menu_dropdown($menu = array(), $parent_id = 0, $depth = 1)
+	{
+		$html = '';
+		if (empty($menu[$parent_id])) {
+			return $html;
+		}
+
+		foreach ($menu[$parent_id] as $mval) {
+			$men_id = element('men_id', $mval);
+			$link   = element('men_link', $mval) ? element('men_link', $mval) : 'javascript:;';
+			$target = element('men_target', $mval) ? ' target="' . element('men_target', $mval) . '"' : '';
+			$custom = element('men_custom', $mval);
+			$name   = html_escape(element('men_name', $mval));
+
+			if ( ! empty($menu[$men_id])) {
+				$html .= '<li class="has-children depth-' . $depth . '">';
+				$html .= '<a href="' . $link . '" class="nav-link" ' . $target . ' ' . $custom . ' title="' . $name . '">' . $name . '</a>';
+				$html .= '<button type="button" class="menu-toggle" aria-expanded="false" aria-label="' . $name . ' 하위메뉴 열기/닫기"><i class="fa fa-chevron-down"></i></button>';
+				$html .= '<ul class="dropdown depth-' . ($depth + 1) . '">';
+				$html .= render_menu_dropdown($menu, $men_id, $depth + 1);
+				$html .= '</ul></li>';
+			} else {
+				$html .= '<li class="depth-' . $depth . '"><a href="' . $link . '" class="nav-link" ' . $target . ' ' . $custom . ' title="' . $name . '">' . $name . '</a></li>';
+			}
+		}
+
+		return $html;
+	}
+}
+
+
+/**
+ * 무한 depth 메뉴를 m_menu/subopen/drop-downorder 아코디언 구조의 HTML 로 재귀 출력합니다 (모바일 테마)
+ * data-menu-order / drop-downorder 클래스는 전체 트리에서 유일해야 하므로 $counter 를 참조로 넘겨 공유합니다
+ * depth 별로 색을 구분할 수 있도록 li/ul 에 'depth-N' 클래스를 함께 출력합니다
+ */
+if ( ! function_exists('render_menu_accordion')) {
+	function render_menu_accordion($menu = array(), $parent_id = 0, &$counter = null, $options = array(), $depth = 1)
+	{
+		if ($counter === null) {
+			$counter = 0;
+		}
+
+		$ul_class   = element('ul_class', $options) ? element('ul_class', $options) : 'dropdown-menu';
+		$icon_class = element('icon_class', $options) ? element('icon_class', $options) : 'fa-chevron-down';
+		$link_class = element('link_class', $options) ? ' class="' . element('link_class', $options) . '"' : '';
+
+		$html = '';
+		if (empty($menu[$parent_id])) {
+			return $html;
+		}
+
+		foreach ($menu[$parent_id] as $mval) {
+			$men_id = element('men_id', $mval);
+			$link   = element('men_link', $mval) ? element('men_link', $mval) : 'javascript:;';
+			$target = element('men_target', $mval) ? ' target="' . element('men_target', $mval) . '"' : '';
+			$custom = element('men_custom', $mval);
+			$name   = html_escape(element('men_name', $mval));
+
+			if ( ! empty($menu[$men_id])) {
+				$order = $counter++;
+				$html .= '<li class="dropdown depth-' . $depth . '">';
+				$html .= '<a href="' . $link . '" ' . $custom . $target . $link_class . ' title="' . $name . '">' . $name . '</a>';
+				$html .= '<a href="#" style="width:25px;float:right;" class="subopen" data-menu-order="' . $order . '"><i class="fa ' . $icon_class . '"></i></a>';
+				$html .= '<ul class="' . $ul_class . ' depth-' . ($depth + 1) . ' drop-downorder-' . $order . '">';
+				$html .= render_menu_accordion($menu, $men_id, $counter, $options, $depth + 1);
+				$html .= '</ul></li>';
+			} else {
+				$html .= '<li class="depth-' . $depth . '"><a href="' . $link . '" ' . $custom . $target . $link_class . ' title="' . $name . '">' . $name . '</a></li>';
+			}
+		}
+
+		return $html;
+	}
+}
+
+
+/**
+ * Menu_model::get_menu_breadcrumb_by_link() 의 결과(최상위메뉴 -> ... -> 현재메뉴 순서의 배열)를
+ * "최상위메뉴명 > 1depth메뉴명 > ..." 형태의 링크 모음 HTML 로 변환합니다
+ */
+if ( ! function_exists('render_menu_breadcrumb')) {
+	function render_menu_breadcrumb($breadcrumb = array(), $separator = ' <span class="breadcrumb-separator">&gt;</span> ')
+	{
+		if (empty($breadcrumb)) {
+			return '';
+		}
+
+		$links = array();
+		foreach ($breadcrumb as $row) {
+			$link = element('men_link', $row) ? element('men_link', $row) : 'javascript:;';
+			$name = html_escape(element('men_name', $row));
+			$links[] = '<a href="' . $link . '">' . $name . '</a>';
+		}
+
+		return implode($separator, $links);
+	}
+}
+
+
+/**
+ * Menu_model::get_menu_children_tree() 의 결과(하위메뉴 + 각 하위메뉴의 하위메뉴)를
+ * 카드형 그리드 HTML 로 변환합니다 (문서 본문 아래 하위메뉴 자동 표시용)
+ */
+if ( ! function_exists('render_menu_children_cards')) {
+	function render_menu_children_cards($children = array())
+	{
+		if (empty($children)) {
+			return '';
+		}
+
+		$html = '<div class="container" style="padding-top: 30px; padding-bottom: 30px;">';
+		$html .= '<div class="row" style="display: flex; flex-wrap: wrap;">';
+
+		foreach ($children as $child) {
+			$child_link = element('men_link', $child) ? element('men_link', $child) : 'javascript:;';
+			$child_name = html_escape(element('men_name', $child));
+			$grandchildren = element('children', $child);
+
+			$html .= '<div class="col-md-4 col-sm-6 margin-bottom-30" style="display: flex; flex-direction: column; margin-bottom: 30px;">';
+			$html .= '<div class="single_service" style="background: #ffffff; border: 1px solid #e1e6eb; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 30px; border-radius: 6px; flex: 1; min-height: 100%;">';
+			$html .= '<h4 class="pro_tx1" style="font-weight: 600; margin-top: 0; margin-bottom: 20px; color: #1b2032; font-size: 18px;">';
+			$html .= '<a href="' . $child_link . '" style="color: #1b2032; text-decoration: none;">' . $child_name . '</a>';
+			$html .= '</h4>';
+
+			if ($grandchildren) {
+				$html .= '<ul class="list-unstyled" style="margin-bottom: 0;">';
+				foreach ($grandchildren as $grandchild) {
+					$grandchild_link = element('men_link', $grandchild) ? element('men_link', $grandchild) : 'javascript:;';
+					$grandchild_name = html_escape(element('men_name', $grandchild));
+					$html .= '<li style="padding: 6px 0;"><a href="' . $grandchild_link . '" class="link05" style="color: #555555; text-decoration: none;">- ' . $grandchild_name . '</a></li>';
+				}
+				$html .= '</ul>';
+			}
+
+			$html .= '</div>';
+			$html .= '</div>';
+		}
+
+		$html .= '</div>';
+		$html .= '</div>';
+
+		return $html;
+	}
+}
+
+
+/**
  * 검색 select option
  */
 if ( ! function_exists('search_option')) {
@@ -1538,5 +1692,116 @@ if ( ! function_exists('check_cache_dir')) {
 			}
 		}
 		return true;
+	}
+}
+if ( ! function_exists('debug')) {
+	function debug(...$args) {
+		// CLI 환경이거나 인자가 없으면 실행하지 않음
+		if (php_sapi_name() === 'cli' || empty($args)) {
+			return;
+		}
+
+		// 고유한 ID 생성을 통해 한 페이지 내에서 debug()를 여러 번 호출해도 정상 작동하도록 처리
+		$debugId = 'php-debug-' . uniqid();
+
+		echo "\n";
+		echo "<style>
+			.{$debugId}-wrapper {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				z-index: 999999;
+				font-family: 'Consolas', 'Courier New', monospace;
+				box-sizing: border-box;
+			}
+			.{$debugId}-tab {
+				height: 30px;
+				line-height: 30px;
+				background: #2c3e50;
+				color: #ecf0f1;
+				padding: 0 20px;
+				font-size: 13px;
+				font-weight: bold;
+				cursor: pointer;
+				display: inline-block;
+				border-top-left-radius: 4px;
+				border-top-right-radius: 4px;
+				box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
+				margin-left: 20px;
+			}
+			.{$debugId}-content {
+				height: 0;
+				background: #1e1e1e;
+				color: #d4d4d4;
+				overflow-y: auto;
+				transition: height 0.3s ease-in-out;
+				box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+			}
+			.{$debugId}-content.open {
+				height: 70vh; /* 화면의 70% 높이 */
+			}
+			.{$debugId}-inner {
+				padding: 20px;
+			}
+			.{$debugId}-item {
+				margin-bottom: 15px;
+				border-bottom: 1px solid #333;
+				padding-bottom: 15px;
+			}
+			.{$debugId}-item:last-child {
+				border-bottom: none;
+				margin-bottom: 0;
+				padding-bottom: 0;
+			}
+			.{$debugId}-pre {
+				margin: 0;
+				white-space: pre-wrap;
+				word-wrap: break-word;
+				font-size: 13px;
+				line-height: 1.5;
+			}
+		</style>";
+
+		echo "<div class='{$debugId}-wrapper'>";
+		echo "  <div class='{$debugId}-tab' onclick='toggleDebugPanel(\"{$debugId}\")'>🐛 DEBUG (" . count($args) . ")</div>";
+		echo "  <div id='{$debugId}' class='{$debugId}-content' onclick='toggleDebugPanel(\"{$debugId}\")'>";
+		echo "      <div class='{$debugId}-inner' onclick='event.stopPropagation();'>"; // 내부 클릭 시 닫히는 현상 방지
+		
+		// 전달된 모든 파라미터를 순회하며 출력
+		foreach ($args as $index => $arg) {
+			echo "      <div class='{$debugId}-item'>";
+			echo "          <span style='color: #569cd6; font-weight: bold;'>[Param " . ($index + 1) . "]</span>";
+			echo "          <pre class='{$debugId}-pre'>";
+			
+			// 문자열, 숫자 등은 그대로 출력, 배열/객체는 보기 좋게 정렬
+			if (is_scalar($arg)) {
+				var_dump($arg);
+			} else {
+				echo htmlspecialchars(print_r($arg, true));
+			}
+			
+			echo "          </pre>";
+			echo "      </div>";
+		}
+
+		echo "      </div>";
+		echo "  </div>";
+		echo "</div>";
+
+		// 탭 토글용 자바스크립트 (최초 1회만 선언되도록 처리)
+		static $jsRendered = false;
+		if (!$jsRendered) {
+			echo "<script>
+				function toggleDebugPanel(id) {
+					const panel = document.getElementById(id);
+					if (panel) {
+						panel.classList.toggle('open');
+					}
+				}
+			</script>";
+			$jsRendered = true;
+		}
+		echo "\n";
 	}
 }

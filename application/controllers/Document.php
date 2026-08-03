@@ -18,14 +18,15 @@ class Document extends CB_Controller
 	/**
 	 * 모델을 로딩합니다
 	 */
-	protected $models = array('Document');
+	protected $models = array('Document', 'Menu');
 
 	/**
 	 * 헬퍼를 로딩합니다
 	 */
-	protected $helpers = array('form', 'array');
+    
+    protected $helpers = array('form', 'array');
 
-	function __construct()
+    function __construct()
 	{
 		parent::__construct();
 
@@ -33,6 +34,9 @@ class Document extends CB_Controller
 		 * 라이브러리를 로딩합니다
 		 */
 		$this->load->library(array('querystring'));
+        
+        
+        $this->load->helper('basic_helper');
 	}
 
 
@@ -56,7 +60,7 @@ class Document extends CB_Controller
 		$view['view']['event']['before'] = Events::trigger('before', $eventname);
 
 		$docinfo = $this->cache->get('document-key-id-info');
-
+                       
 		$doc_id = ($docinfo && element($doc_key, $docinfo)) ? element($doc_key, $docinfo) : '';
 		if ($doc_id) {
 			$data = $this->Document_model->get_one($doc_id);
@@ -69,7 +73,7 @@ class Document extends CB_Controller
 		if ( ! element('doc_id', $data)) {
 			show_404();
 		}
-
+        
 		if ( ! $this->session->userdata('doc_id_' . element('doc_id', $data))) {
 			$this->Document_model->update_hit(element('doc_id', $data));
 			$this->session->set_userdata(
@@ -77,7 +81,7 @@ class Document extends CB_Controller
 				'1'
 			);
 		}
-
+        
 		$data['content'] = ($this->cbconfig->get_device_view_type() === 'mobile')
 			? (element('doc_mobile_content', $data) ? element('doc_mobile_content', $data)
 			: element('doc_content', $data)) : element('doc_content', $data);
@@ -102,10 +106,24 @@ class Document extends CB_Controller
 			$popup,
 			$writer_is_admin = true
 		);
+        
+        debug($docinfo, $data, $doc_id, $doc_key);
+        
 		$view['view']['data'] = $data;
 		$view['view']['doc_key'] = $doc_key;
 
-		$view['view']['canonical'] = document_url($doc_key);
+		$doc_url = document_url($doc_key);
+		$view['view']['canonical'] = $doc_url;
+
+		// 이 문서가 메뉴의 링크 대상이라면, 최상위메뉴부터 현재 메뉴까지의 경로를 구합니다
+		$menu_breadcrumb = $this->Menu_model->get_menu_breadcrumb_by_link($doc_url, $this->cbconfig->get_device_view_type());
+		$view['view']['menu_breadcrumb'] = $menu_breadcrumb;
+
+		// 이 문서가 메뉴의 링크 대상이고, 그 메뉴가 하위메뉴를 가지고 있다면 하위메뉴 목록을 구합니다
+		$current_menu = $menu_breadcrumb ? end($menu_breadcrumb) : null;
+		$view['view']['menu_children'] = $current_menu
+			? $this->Menu_model->get_menu_children_tree($current_menu['men_id'], $this->cbconfig->get_device_view_type())
+			: array();
 
 		// 이벤트가 존재하면 실행합니다
 		$view['view']['event']['before_layout'] = Events::trigger('before_layout', $eventname);

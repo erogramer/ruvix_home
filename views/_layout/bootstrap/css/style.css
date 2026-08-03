@@ -581,6 +581,12 @@ nav , .pagination{text-align:center;}
 #side_menu .dropdown-custom-menu li a{color: #888; }
 #side_menu .dropdown-custom-menu li a:hover{color: #7080b1;}
 
+/* depth 별 색상 (인식하기 쉽도록 depth 마다 고유 색을 부여, render_menu_accordion() 이 출력하는 depth-N 클래스 사용) */
+#side_menu .dropdown-custom-menu.depth-2{border-left: 3px solid #ffaa17;}
+#side_menu .dropdown-custom-menu.depth-3{border-left: 3px solid #16a596; background:#1c2a29;}
+#side_menu .dropdown-custom-menu.depth-4{border-left: 3px solid #8b5cf6; background:#221c33;}
+#side_menu .dropdown-custom-menu.depth-5{border-left: 3px solid #3b82f6; background:#1a2333;}
+
 #side_menu .m_login{text-align: center; margin: 10px;}
 #side_menu .m_login span{ padding: 0 5px;}
 #side_menu .m_board{background: #000; clear: both; margin:0; }

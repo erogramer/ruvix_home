@@ -61,7 +61,32 @@ $config['uri_segment_cmall_item'] ='item';  //Cmall item 페이지 주소
  * 서브에 설치하는 경우 올바른 예 ) http://www.test.com/subdir/
  * 서브에 설치하는 경우 잘못된 예 ) http://www.test.com/subdir/index.php
  */
-$config['base_url'] = '';
+
+
+
+
+
+
+
+// 기존 코드 제거 
+$config['base_url'] = 'http://home.ruvix.co.kr';
+
+// 접속한 서버의 프로토콜(http/https)과 도메인, 폴더 경로를 자동으로 조합합니다.
+$root = "http://".$_SERVER['HTTP_HOST'];
+$root .= str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
+
+$config['base_url'] = $root;
+
+
+
+
+
+
+
+
+
+
+
 if (empty($config['base_url'])) exit("&dollar;config&lsqb;&apos;base_url&apos;&rsqb;  need to be set up in application/config/config.php");  // base_url 의 값을 입력하신 후에는 여기 if 문 자체를 주석처리해도 좋습니다
 
 /*
@@ -437,7 +462,7 @@ $config['cache_query_string'] = FALSE;
  * CiBoard 주 : 아래의 값을 입력해주세요
  * 입력하신 값은 외부에 공개되지 않도록 주의해주세요
  */
-$config['encryption_key'] = '';
+$config['encryption_key'] = 'gud!!gkdtkdrhakdnj';
 
 /*
 |--------------------------------------------------------------------------

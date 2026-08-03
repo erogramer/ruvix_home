@@ -38,6 +38,36 @@
 
 /*
  *---------------------------------------------------------------
+ * LOAD .env FILE
+ *---------------------------------------------------------------
+ *
+ * Loads key=value pairs from a .env file (if present) into getenv()/$_ENV,
+ * without overriding variables already set at the OS/webserver level.
+ */
+	$_env_file = __DIR__.DIRECTORY_SEPARATOR.'.env';
+	if (is_file($_env_file))
+	{
+		foreach (file($_env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $_env_line)
+		{
+			$_env_line = trim($_env_line);
+			if ($_env_line === '' OR $_env_line[0] === '#' OR strpos($_env_line, '=') === FALSE)
+			{
+				continue;
+			}
+			list($_env_key, $_env_value) = explode('=', $_env_line, 2);
+			$_env_key = trim($_env_key);
+			$_env_value = trim($_env_value, " \t\n\r\0\x0B\"'");
+			if (getenv($_env_key) === FALSE)
+			{
+				putenv($_env_key.'='.$_env_value);
+				$_ENV[$_env_key] = $_env_value;
+			}
+		}
+		unset($_env_file, $_env_line, $_env_key, $_env_value);
+	}
+
+/*
+ *---------------------------------------------------------------
  * APPLICATION ENVIRONMENT
  *---------------------------------------------------------------
  *
@@ -59,7 +89,10 @@
  * 그래야 install 페이지로 정상적으로 이동됩니다.
  * 설치 이후에는 이 값을 변경하셔도 상관없습니다.
 */
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'production');
+
+
+define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'production');
+
 
 /*
  *---------------------------------------------------------------
@@ -69,6 +102,8 @@
  * Different environments will require different levels of error reporting.
  * By default development will show errors but testing and live will hide them.
  */
+
+
 switch (ENVIRONMENT)
 {
 	case 'development':
@@ -86,7 +121,7 @@ switch (ENVIRONMENT)
 		else
 		{
 			error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_USER_NOTICE);
-		}
+		}        
 	break;
 
 	default:

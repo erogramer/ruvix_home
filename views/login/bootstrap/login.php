@@ -1,8 +1,10 @@
 <?php $this->managelayout->add_css(element('view_skin_url', $layout) . '/css/style.css'); ?>
 
-<div class="access col-md-6 col-md-offset-3">
+<div class="access col-md-6 col-md-offset-3" style="padding: 60px;">
 	<div class="panel panel-default">
-		<div class="panel-heading">로그인</div>
+		<!-- <div class="panel-heading">로그인</div> -->
+                <h2>로그인</h2>
+                <br>
 		<div class="panel-body">
 			<?php
 			echo validation_errors('<div class="alert alert-warning" role="alert">', '</div>');
@@ -24,6 +26,7 @@
 						<input type="password" class="form-control" name="mem_password" />
 					</div>
 				</div>
+                                <br>
 				<div class="form-group">
 					<div class="col-sm-2 col-sm-offset-3">
 						<button type="submit" class="btn btn-primary btn-sm">로그인</button>

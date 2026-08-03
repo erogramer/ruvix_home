@@ -128,42 +128,9 @@ var cookie_prefix = "<?php echo config_item('cookie_prefix'); ?>";
 				</ul>
 				<ul class="m_menu">
 					<?php
-					$menuhtml = '';
 					if (element('menu', $layout)) {
-						$menu = element('menu', $layout);
-						if (element(0, $menu)) {
-							foreach (element(0, $menu) as $mkey => $mval) {
-								if (element(element('men_id', $mval), $menu)) {
-									$mlink = element('men_link', $mval) ? element('men_link', $mval) : 'javascript:;';
-									$menuhtml .= '<li class="dropdown">
-									<a href="' . $mlink . '" ' . element('men_custom', $mval);
-									if (element('men_target', $mval)) {
-										$menuhtml .= ' target="' . element('men_target', $mval) . '"';
-									}
-									$menuhtml .= ' title="' . html_escape(element('men_name', $mval)) . '">' . html_escape(element('men_name', $mval)) . '</a><a href="#" style="width:25px;float:right;" class="subopen" data-menu-order="' . $mkey . '"><i class="fa fa-chevron-down"></i></a>
-									<ul class="dropdown-menu drop-downorder-' . $mkey . '">';
-
-									foreach (element(element('men_id', $mval), $menu) as $skey => $sval) {
-										$menuhtml .= '<li><a href="' . element('men_link', $sval) . '" ' . element('men_custom', $sval);
-										if (element('men_target', $sval)) {
-											$menuhtml .= ' target="' . element('men_target', $sval) . '"';
-										}
-										$menuhtml .= ' title="' . html_escape(element('men_name', $sval)) . '">' . html_escape(element('men_name', $sval)) . '</a></li>';
-									}
-									$menuhtml .= '</ul></li>';
-
-								} else {
-									$mlink = element('men_link', $mval) ? element('men_link', $mval) : 'javascript:;';
-									$menuhtml .= '<li><a href="' . $mlink . '" ' . element('men_custom', $mval);
-									if (element('men_target', $mval)) {
-										$menuhtml .= ' target="' . element('men_target', $mval) . '"';
-									}
-									$menuhtml .= ' title="' . html_escape(element('men_name', $mval)) . '">' . html_escape(element('men_name', $mval)) . '</a></li>';
-								}
-							}
-						}
+						echo render_menu_accordion(element('menu', $layout));
 					}
-					echo $menuhtml;
 					?>
 				</ul>
 			</div>

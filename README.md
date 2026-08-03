@@ -37,7 +37,7 @@ PHP version 5.6 이상이 요구됩니다.
 * [Bootstrap](http://getbootstrap.com)
 * [jQuery](http://jquery.com)
 * [jQuery Validation](http://jqueryvalidation.org)
-* [Naver Smart Editor](http://naver.github.io/smarteditor2/)
+* [Naver Smart Editor](http://naver.github.io/smarteditor2/) kk
 
 ## Powered By
 

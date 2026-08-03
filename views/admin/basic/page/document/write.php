@@ -3,7 +3,7 @@
 		<?php
 		echo validation_errors('<div class="alert alert-warning" role="alert">', '</div>');
 		$attributes = array('class' => 'form-horizontal', 'name' => 'fadminwrite', 'id' => 'fadminwrite');
-		echo form_open(current_full_url(), $attributes);
+		echo form_open_multipart(current_full_url(), $attributes);
 		?>
 			<input type="hidden" name="<?php echo element('primary_key', $view); ?>"	value="<?php echo element(element('primary_key', $view), element('data', $view)); ?>" />
 			<div class="form-group">
@@ -67,6 +67,21 @@
 				<div class="col-sm-10">
 					<?php echo display_dhtml_editor('doc_mobile_content', set_value('doc_mobile_content', element('doc_mobile_content', element('data', $view))), $classname = 'form-control dhtmleditor', $is_dhtml_editor = $this->cbconfig->item('use_document_dhtml'), $editor_type = $this->cbconfig->item('document_editor_type')); ?>
 					모바일 내용이 일반웹페이지 내용과 다를 경우에 입력합니다. 같은 경우는 입력하지 않으셔도 됩니다
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">PDF 첨부</label>
+				<div class="col-sm-10">
+					<?php if (element('doc_pdf_originname', element('data', $view))) { ?>
+						<p>
+							현재 파일: <?php echo html_escape(element('doc_pdf_originname', element('data', $view))); ?>
+							<label class="checkbox-inline" style="margin-left:10px;">
+								<input type="checkbox" name="doc_pdf_delete" value="1" /> 삭제
+							</label>
+						</p>
+					<?php } ?>
+					<input type="file" name="doc_pdf" accept="application/pdf" />
+					<p class="help-block">본문 아래에 표시됩니다. PDF 파일만 업로드 가능합니다 (최대 32MB)</p>
 				</div>
 			</div>
 			<div class="btn-group pull-right" role="group" aria-label="...">

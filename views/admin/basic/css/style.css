@@ -148,8 +148,8 @@ input[type=number].form-control {text-align:right;width:100px;}
 /* content_wrapper */
 .contents h3{margin:15px;}
 .content_wrapper{position:relative; left:0; margin-left:220px;z-index:100;background:#f3f3f4; overflow:hidden; }
-.nav-header{background:#1b222a; height:70px; line-height:70px; text-align:center;}
-.nav-header a{background:#1b222a; color:#fff; font-size:20px; text-decoration:none;}
+.nav-header{background:#fff; height:70px; line-height:70px;}
+.nav-header a{background:#fff; color:#fff; font-size:20px; text-decoration:none;}
 .header{background:#446181; margin-bottom:20px;border-bottom: 1px solid #e7eaec !important;height:71px;line-height: 70px; position:relative;}
 .navbar-minimalize{float:left; margin:0 15px;}
 .box{width:100%;float:left; padding:0 20px;}
@@ -219,6 +219,9 @@ ul.de_pg_tab li.tab-current a{background:#2CC185;color:#fff}
 #nameContextMenu a { color:#fff; font-size:12px; line-height:20px; display:block; }
 #nameContextMenu a:hover { color:#ff0000; }
 #nameContextMenu td { border:0px !important; }
+
+/* 메뉴관리(pagemenu) 목록의 메뉴명 입력란을 더 넓게 표시합니다 */
+.pagemenu-men-name { min-width: 360px; }
 
 @media (max-width: 768px) {
 	.nav-default{display:none; }

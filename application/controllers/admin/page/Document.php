@@ -328,6 +328,56 @@ class Document extends CB_Controller
 				'doc_updated_datetime' => cdate('Y-m-d H:i:s'),
 			);
 
+			/**
+			 * 본문 아래에 보여줄 PDF 파일을 업로드하거나, 기존 PDF를 삭제하는 경우입니다
+			 */
+			if (isset($_FILES['doc_pdf']) && ! empty($_FILES['doc_pdf']['name'])) {
+
+				$this->load->library('upload');
+
+				$upload_path = config_item('uploads_dir') . '/document/';
+				$year_path = $upload_path . cdate('Y') . '/';
+				$month_path = $year_path . cdate('m') . '/';
+				foreach (array($upload_path, $year_path, $month_path) as $dir) {
+					if (is_dir($dir) === false) {
+						mkdir($dir, 0707);
+						$f = @fopen($dir . 'index.php', 'w');
+						@fwrite($f, '');
+						@fclose($f);
+						@chmod($dir . 'index.php', 0644);
+					}
+				}
+
+				$this->upload->initialize(array(
+					'upload_path' => $month_path,
+					'allowed_types' => 'pdf',
+					'max_size' => 32768,
+					'encrypt_name' => true,
+				));
+
+				if ($this->upload->do_upload('doc_pdf')) {
+					$filedata = $this->upload->data();
+					if ($pid && element('doc_pdf_filename', $getdata)) {
+						@unlink(config_item('uploads_dir') . '/document/' . element('doc_pdf_filename', $getdata));
+					}
+					$updatedata['doc_pdf_filename'] = cdate('Y') . '/' . cdate('m') . '/' . element('file_name', $filedata);
+					$updatedata['doc_pdf_originname'] = element('orig_name', $filedata);
+				} else {
+					$this->session->set_flashdata(
+						'message',
+						'PDF 업로드에 실패했습니다: ' . strip_tags($this->upload->display_errors())
+					);
+					redirect(admin_url($this->pagedir . '/write/' . $pid));
+					return;
+				}
+			} elseif ($this->input->post('doc_pdf_delete')) {
+				if ($pid && element('doc_pdf_filename', $getdata)) {
+					@unlink(config_item('uploads_dir') . '/document/' . element('doc_pdf_filename', $getdata));
+				}
+				$updatedata['doc_pdf_filename'] = '';
+				$updatedata['doc_pdf_originname'] = '';
+			}
+
 			if ( $this->input->post($primary_key) != $pid ){
 			}
 

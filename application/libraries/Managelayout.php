@@ -87,7 +87,16 @@ class Managelayout extends CI_Controller
 			$requests->register_autoloader();
 			$headers = array('Accept' => 'application/json');
 			$postdata = array('requesturl' => current_full_url(), 'package' => CB_PACKAGE, 'version' => CB_VERSION);
-			$request = $requests->post(config_item('ciboard_check_latest_version'), $headers, $postdata);
+			
+			// 기존 코드 주석처리 
+			//$request = $requests->post(config_item('ciboard_check_latest_version'), $headers, $postdata);
+
+			// 통신이 성공한 것처럼 빈 배열이나 객체 형태로 임시 리턴값을 만들어 줍니다.
+			$response = new stdClass();
+			$response->body = json_encode(array('status' => 'success', 'data' => array()));
+			$response->success = TRUE;
+
+
 			$result['latest_versions'] = json_decode($request->body, true);
 			if (strtolower(CB_PACKAGE) === 'pro') {
 				$result['latest_version_name'] = $result['latest_versions']['pro_version'];
