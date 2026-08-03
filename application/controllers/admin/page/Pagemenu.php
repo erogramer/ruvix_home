@@ -215,17 +215,18 @@ class Pagemenu extends CB_Controller
 		Events::trigger('before', $eventname);
 
 		/**
-		 * 폼에 표시된 모든 메뉴 항목을 업데이트합니다.
+		 * 체크된(=수정된) 메뉴 항목만 업데이트합니다.
 		 *
-		 * (기존에는 체크박스(chk[])가 체크된 항목만 업데이트했으나, 체크박스는 메뉴명 행에 있고
-		 * 링크주소 등은 아래 행에 있어 체크 여부와 무관하게 저장이 안 되는 것처럼 보이는 문제가 있었습니다.
-		 * men_name 배열에는 화면에 표시된 모든 메뉴 항목이 항상 포함되므로, 이를 기준으로 전체를
-		 * 업데이트합니다. 값이 바뀌지 않은 항목은 동일한 값으로 다시 저장될 뿐이라 안전합니다.)
+		 * (체크박스는 뷰의 JS에서 men_name/men_link 등 어떤 필드든 값이 바뀌면 해당 행의
+		 * 체크박스를 자동으로 체크하도록 되어 있어, 실제로 수정한 행만 정확히 반영됩니다.
+		 * 폼 전체(men_name 등)가 서버로 제대로 전달되지 못하던 문제는 PHP max_input_vars
+		 * 설정을 올려 별도로 해결했습니다. 여기서 전체 항목을 매번 업데이트하면 메뉴가 많을 때
+		 * 클릭 한 번에 수백 개의 UPDATE 쿼리가 나가 느려지므로, 체크된 항목만 처리합니다.)
 		 */
 		$updated_count = 0;
-		$men_name = $this->input->post('men_name');
-		if ($men_name && is_array($men_name)) {
+		if ($this->input->post('chk') && is_array($this->input->post('chk'))) {
 
+			$men_name = $this->input->post('men_name');
 			$men_target = $this->input->post('men_target');
 			$men_custom = $this->input->post('men_custom');
 			$men_order = $this->input->post('men_order');
@@ -233,13 +234,13 @@ class Pagemenu extends CB_Controller
 			$men_mobile = $this->input->post('men_mobile');
 			$men_link = $this->input->post('men_link');
 
-			foreach ($men_name as $val => $name) {
+			foreach ($this->input->post('chk') as $val) {
 				if ($val) {
 					$men_order_update = element($val, $men_order) ? element($val, $men_order) : 0;
 					$men_desktop_update = element($val, $men_desktop) ? element($val, $men_desktop) : 0;
 					$men_mobile_update = element($val, $men_mobile) ? element($val, $men_mobile) : 0;
 					$updatedata = array(
-						'men_name' => $name,
+						'men_name' => element($val, $men_name),
 						'men_target' => element($val, $men_target),
 						'men_custom' => element($val, $men_custom),
 						'men_order' => $men_order_update,

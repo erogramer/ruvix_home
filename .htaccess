@@ -1,3 +1,13 @@
+<IfModule mod_php7.c>
+	php_value max_input_vars 5000
+</IfModule>
+<IfModule mod_php.c>
+	php_value max_input_vars 5000
+</IfModule>
+<IfModule php_module>
+	php_value max_input_vars 5000
+</IfModule>
+
 RewriteEngine on
 
 RewriteCond %{REQUEST_URI} !^(/index\.php|/assets/|/robots\.txt|/favicon\.ico)
