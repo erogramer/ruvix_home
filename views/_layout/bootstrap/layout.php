@@ -403,14 +403,17 @@ header.site-navbar.sub-layout-header.is-sticky {
 
                 <?php if (element('use_sidebar', $layout)) { ?>
                 <div class="col-md-9 col-sm-8 col-xs-12 mb20">
+                <?php } else { ?>
+                <div class="col-md-12">
                 <?php } ?>
 
                 <!-- 본문 시작 -->
                 <?php if (isset($yield)) echo $yield; ?>
                 <!-- 본문 끝 -->
 
-                <?php if (element('use_sidebar', $layout)) { ?>
                 </div>
+
+                <?php if (element('use_sidebar', $layout)) { ?>
                 <div class="col-md-3 col-sm-4 col-xs-12">
                     <div class="sidebar">
                         <?php $this->load->view(element('layout_skin_path', $layout) . '/sidebar'); ?>
