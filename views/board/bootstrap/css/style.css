@@ -46,6 +46,42 @@
 .board .autosize iframe, .autosize object, .autosize embed { position: absolute; top: 0; left: 0; width: 100%; height:100%; }
 
 .board .searchbox {display:none;}
+
+/**
+	목록 상단 정렬/검색 영역
+	Bootstrap 5 환경에서 Bootstrap 3 마크업(col-xs-*, pull-*, form-inline, navbar-form, px*)이
+	깨지는 부분을 보정한다.
+*/
+.board .px100 {width:100px;}
+.board .px150 {width:150px;}
+
+.board .row.mb20 {margin-bottom:20px; justify-content:space-between; align-items:center; row-gap:10px;}
+.board .row.mb20 > .col-xs-6,
+.board .row.mb20 > .col-md-6 {width:auto; max-width:100%;}
+
+/* 좌측: RSS 버튼, 정렬/카테고리 드롭다운 */
+.board .row.mb20 > .col-xs-6 {display:flex; flex:1 1 auto; flex-wrap:wrap; align-items:center; gap:8px;}
+
+/* 우측: 검색 영역 (DOM 순서 searchbox, searchbuttonbox, point-info 를 오른쪽부터 배치) */
+.board .row.mb20 > .col-md-6 {display:flex; flex:0 0 auto; flex-direction:row-reverse; justify-content:flex-start; align-items:center; gap:8px; margin-left:auto;}
+.board .row.mb20 > .col-md-6 .pull-right {float:none; margin:0;}
+.board .searchbox form,
+.board .searchbox .form-group {display:flex; flex-wrap:nowrap; align-items:center; gap:6px; float:none; margin:0; padding:0;}
+.board .searchbox .pull-left {float:none;}
+
+/* 컨트롤 크기 통일 (높이 34px) */
+.board .row.mb20 .form-control {height:34px; padding:4px 10px; font-size:14px; line-height:1.5;}
+.board .row.mb20 select.form-control {padding-right:28px; cursor:pointer; background-repeat:no-repeat; background-position:right 10px center; background-size:12px 10px; background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");}
+.board .row.mb20 .btn-sm {height:34px; min-width:38px; padding:0 12px; font-size:14px; line-height:1;}
+
+/* 좁은 화면: 검색 폼이 한 줄에 다 들어가지 않으면 입력창이 줄어들도록 함 */
+@media (max-width: 575px) {
+	.board .row.mb20 > .col-md-6 {flex:1 1 100%;}
+	.board .row.mb20 > .col-md-6 .searchbox {flex:1 1 auto; min-width:0;}
+	.board .searchbox form,
+	.board .searchbox .form-group {width:100%;}
+	.board .searchbox input.form-control {flex:1 1 auto; width:auto; min-width:0;}
+}
 .board .passcord { text-align: center;margin:10px auto 0 auto;}
 .board .passcord li{display:inline-block;margin-right:20px;vertical-align:middle;}
 
